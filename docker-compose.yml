@@ -1,0 +1,28 @@
+services:
+  api:
+    build: .
+    ports:
+      - "192.168.0.116:18000:8000"
+    environment:
+      HIVEMIND_MODE: fictional-data-only
+      DATABASE_URL: postgresql://hivemind:change-me@db:5432/hivemind
+      WORKER_TOKEN: ${HIVEMIND_WORKER_TOKEN}
+      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: hivemind
+      POSTGRES_USER: hivemind
+      POSTGRES_PASSWORD: change-me
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hivemind -d hivemind"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+volumes:
+  pgdata:
