@@ -1,0 +1,1 @@
+"""Hivemind Trading Bot Etapp B."""
