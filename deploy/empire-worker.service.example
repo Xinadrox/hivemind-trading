@@ -1,0 +1,20 @@
+[Unit]
+Description=Hivemind Empire Worker
+After=network-online.target
+
+[Service]
+Type=simple
+User=peo
+WorkingDirectory=/opt/hivemind-worker
+EnvironmentFile=/etc/hivemind-worker/worker.env
+ExecStart=/usr/bin/python3 -m hivemind.worker_runtime
+Restart=on-failure
+RestartSec=30
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=false
+ReadWritePaths=/var/lib/hivemind-worker
+
+[Install]
+WantedBy=default.target
