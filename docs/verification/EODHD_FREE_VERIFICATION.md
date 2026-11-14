@@ -29,6 +29,10 @@ Utanför scope ligger realtidsdata, orderläggning, skrivande API-anrop, driftko
 
 Evidensgrund: verifierade användarresultat från EODHD EOD-endpointen i den refererade konversationen. Protokollet gör inga påståenden om dataposter som inte uttryckligen ingår i detta underlag.
 
+### Särskilt kontrollfall: Investor B:s historiska split
+
+EODHD:s split-endpoint returnerade för `INVE-B.ST` en split den **19 maj 2021** med förhållandet **4:1** (`4.000000/1.000000`). Detta dokumenteras som ett separat corporate-actions-kontrollfall. EODHD Free:s historikbegränsning på ett år hindrade samtidigt hämtning av EOD-priser kring maj 2021 med det aktuella abonnemanget: en begäran för 2021-05-14–2021-05-24 returnerade i stället en post från 2025-11-14 tillsammans med varningen `Data is limited by one year as you have free subscription`. Splitinformationen är därför observerad, men historisk prisjustering vid splitten är inte verifierad.
+
 ## 4 Testmatris
 
 | ID | Kontroll | Förväntat resultat | Evidens/status | Gate |
@@ -54,6 +58,8 @@ Evidensgrund: verifierade användarresultat från EODHD EOD-endpointen i den ref
 - Licensvillkor för EODHD Free är inte slutligt bedömda i detta protokoll; juridisk och operativ användning får därför inte antas vara tillåten.
 - Testerna visar inte tillgänglighet, rate limits, felåterhämtning, revisionsspår, tidszonshantering eller långsiktig datakvalitet.
 - Resultaten är användarverifierade observationer, inte ett fullständigt leverantörs- eller säkerhetsgodkännande.
+- EODHD Free:s uppgivna historikdjup på ett år begränsar flerårig backtesting och historisk validering. Abonnemangsvillkoret och historikdjupet ska bekräftas mot aktuella leverantörsvillkor innan sådana analyser används som beslutsunderlag.
+- Investor B:s splitdatum och splitförhållande är identifierade, men prisserien kring splitten kunde inte verifieras med Free-planen.
 
 ## 6 Riskregister och motåtgärder
 
