@@ -25,7 +25,9 @@ Utanför scope ligger realtidsdata, orderläggning, skrivande API-anrop, driftko
 |---|---:|---:|---|---|
 | VOLV-B.ST | 2026-11-02–2026-11-13 | 10 | Giltiga OHLC-intervall; positiva volymer; unika datum; adjusted_close | Preliminärt godkänd |
 | ATCO-A.ST | 2026-11-09–2026-11-13 | 5 | Giltiga OHLC-intervall; positiva volymer; unika datum; adjusted_close | Preliminärt godkänd |
-| Investor B | Ej slutverifierad | Ej fastställt | Ej slutverifierad | Öppen |
+| Investor B (`INVE-B.ST`) | 2026-11-09–2026-11-13 | 5 | Giltiga OHLC-intervall; positiva volymer; unika datum; adjusted_close | Preliminärt verifierad |
+
+För Investor B avser evidensen fem användarlevererade OHLCV-poster för datumen 2026-11-09, 2026-11-10, 2026-11-11, 2026-11-12 och 2026-11-13. Datum är unika, volymerna positiva och varje post uppfyller `low ≤ open/close ≤ high` samt innehåller `adjusted_close`. De fullständiga råsvaren finns i den refererade användarkonversationen; detta protokoll återger endast verifieringsresultatet och gör inga nya API-anrop.
 
 Evidensgrund: verifierade användarresultat från EODHD EOD-endpointen i den refererade konversationen. Protokollet gör inga påståenden om dataposter som inte uttryckligen ingår i detta underlag.
 
@@ -43,18 +45,32 @@ EODHD:s split-endpoint returnerade för `INVE-B.ST` en split den **19 maj 2021**
 | T04 | Volym | volume > 0 | Observerat för samtliga redovisade poster | GODKÄND preliminärt |
 | T05 | Datumunikhet | Inga dubbletter inom instrument och period | Observerat för båda instrumenten | GODKÄND preliminärt |
 | T06 | Justerat stängningspris | adjusted_close finns och är numeriskt användbart | Observerat för samtliga redovisade poster | GODKÄND preliminärt |
-| T07 | Investor B | Samma kontrollpaket som T01–T06 | Ej slutverifierad | EJ GODKÄND |
-| T08 | Historiska utdelningar och splittar | Corporate actions kan identifieras och hanteras korrekt | Återstår | ÖPPEN |
-| T09 | Officiell kurssamstämmighet | Jämförelse mot auktoritativ källa inom definierad tolerans | Återstår | ÖPPEN |
+| T07 | Investor B | Samma kontrollpaket som T01–T06 | Fem användarlevererade poster 2026-11-09–2026-11-13; giltiga OHLC-intervall, positiva volymer, unika datum och `adjusted_close` observerade | PRELIMINÄRT VERIFIERAD |
+| T08 | Historiska utdelningar och splittar | Corporate actions kan identifieras och hanteras korrekt | Splitjustering kring 2021-05-19 återstår; Free-planens historikbegränsning kvarstår | ÖPPEN |
+| T09 | Officiell kurssamstämmighet | Jämförelse mot auktoritativ källa inom definierad tolerans | Financial Times historiktabell kontrollerad 2026-11-14; fem stängningar matchar vid 0,01 SEK visad precision | GODKÄND preliminärt |
 | T10 | Licensvillkor | Read-only-användning, lagring, redistribution och kommersiell användning är klarlagda | Återstår | ÖPPEN |
 | T11 | Driftmässig isolering | Test kan ske utan riktig data eller produktionspåverkan | Ska bekräftas separat i designbeslut | ÖPPEN |
+
+### Evidens för T09: Investor B mot Financial Times
+
+Oberoende källa: [Financial Times, Investor AB (INVE B:STO), Historical Prices](https://markets.ft.markitdigital.com/data/equities/tearsheet/historical?s=INVE+B%3ASTO), kontrollerad 2026-11-14. Källans historiktabell visar följande stängningskurser i SEK:
+
+| Datum | EODHD/user API | Financial Times | Avvikelse |
+|---|---:|---:|---:|
+| 2026-11-09 | 429,60 | 429,60 | 0,00 |
+| 2026-11-10 | 431,05 | 431,05 | 0,00 |
+| 2026-11-11 | 435,25 | 435,25 | 0,00 |
+| 2026-11-12 | 436,05 | 436,05 | 0,00 |
+| 2026-11-13 | 436,25 | 436,25 | 0,00 |
+
+Jämförelsetolerans: högst ±0,01 SEK per stängningskurs, motsvarande den tvådecimalsprecision som visas i FT-tabellen. Observerad maximal avvikelse är 0,00 SEK. FT:s sida anger samtidigt att prisinformation kan vara avrundad och därför inte helt exakt; T09 markeras därför som **godkänd preliminärt**, inte slutligt godkänd. Käll-URL, kontrolltidpunkt, instrument, intervall, jämförelsefält, tolerans och avvikelser är därmed spårbara.
 
 ## 5 Begränsningar
 
 - Verifieringen omfattar endast de två instrument och tidsfönster som redovisas ovan.
 - Investor B är inte slutverifierad och får inte betraktas som täckt av detta protokoll.
 - Förekomst av adjusted_close har observerats, men metodik för justering och konsekvens över utdelningar och splittar är inte validerad.
-- Ingen officiell, oberoende kurssamstämmighet har genomförts.
+- T09-jämförelsen mot Financial Times matchar fem Investor B-stängningar vid visad precision; Financial Times anger att prisinformation kan vara avrundad eller ned-/uppjusterad och jämförelsen är därför preliminär, inte ett bevis på underliggande tick- eller fullprecisionlikhet.
 - Licensvillkor för EODHD Free är inte slutligt bedömda i detta protokoll; juridisk och operativ användning får därför inte antas vara tillåten.
 - Testerna visar inte tillgänglighet, rate limits, felåterhämtning, revisionsspår, tidszonshantering eller långsiktig datakvalitet.
 - Resultaten är användarverifierade observationer, inte ett fullständigt leverantörs- eller säkerhetsgodkännande.
