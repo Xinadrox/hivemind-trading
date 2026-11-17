@@ -2,9 +2,10 @@ services:
   api:
     build: .
     ports:
-      - "192.168.0.116:18000:8000"
+      - "127.0.0.1:18000:8000"
     environment:
-      HIVEMIND_MODE: fictional-data-only
+      HIVEMIND_MODE: fixture
+      REAL_DATA_GATE: closed
       DATABASE_URL: postgresql://hivemind:change-me@db:5432/hivemind
       WORKER_TOKEN: ${HIVEMIND_WORKER_TOKEN}
       DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
