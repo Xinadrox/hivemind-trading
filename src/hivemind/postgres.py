@@ -59,7 +59,7 @@ class PostgresJobStore:
                     WHERE j.expires_at > now()
                       AND (j.status = 'QUEUED' OR (j.status = 'LEASED' AND l.lease_expires_at <= now()))
                     ORDER BY j.priority DESC, j.created_at
-                    FOR UPDATE SKIP LOCKED
+                    FOR UPDATE OF j SKIP LOCKED
                     LIMIT 1
                     """
                 )

@@ -111,6 +111,17 @@ def test_lease_token_is_random_and_only_hash_is_persisted():
     assert "worker-1" in connection.calls[-1][1]
 
 
+def test_lease_query_locks_only_jobs_rows():
+    connection = FakeConnection()
+    connection.job = {"id": "01JTEST", "job_type": "analysis", "payload": {"input": {}}, "status": "QUEUED", "attempts": 0}
+    store = PostgresJobStore(connection)
+
+    store.lease_next("worker-1", ttl_seconds=300)
+
+    lease_query = connection.calls[0][0]
+    assert "FOR UPDATE OF j SKIP LOCKED" in lease_query
+
+
 def test_accept_result_rejects_invalid_result_before_database_write():
     connection = FakeConnection()
     store = PostgresJobStore(connection)

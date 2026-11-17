@@ -3,7 +3,8 @@ WORKDIR /app
 COPY pyproject.toml .
 COPY src ./src
 COPY schemas ./schemas
+COPY migrations ./migrations
 RUN pip install --no-cache-dir .
 ENV PYTHONPATH=/app/src
 USER nobody
-CMD ["uvicorn", "hivemind.app:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "python -m hivemind.migrate && exec uvicorn hivemind.app:app --host 0.0.0.0 --port 8000"]
