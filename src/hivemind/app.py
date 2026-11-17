@@ -1,22 +1,24 @@
 from fastapi import FastAPI, Header, HTTPException
 import os
-from datetime import datetime
 import psycopg
 from pydantic import BaseModel, ConfigDict, Field
 from .core import InMemoryJobStore, LeaseConflict, ResultRejected
-from .postgres import PostgresJobStore
 from .outbox import DiscordOutboxMessage, DiscordWebhookClient
+from .config import RuntimeConfig
+from .validation import parse_expiry
 import time
 
 app = FastAPI(title="Hivemind Trading Bot", version="1.0.0a1")
 DATABASE_URL = os.getenv("DATABASE_URL")
 WORKER_TOKEN = os.getenv("WORKER_TOKEN")
 DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL")
+RUNTIME_CONFIG = RuntimeConfig.from_env()
 _sent_notifications = set()
 
 
 def get_store():
     if DATABASE_URL:
+        from .postgres import PostgresJobStore
         return PostgresJobStore(psycopg.connect(DATABASE_URL))
     return store
 
@@ -38,7 +40,9 @@ def readiness():
 
 
 def require_worker_token(token):
-    if WORKER_TOKEN and token != WORKER_TOKEN:
+    if not WORKER_TOKEN:
+        raise HTTPException(status_code=503, detail="worker authentication is not configured")
+    if token != WORKER_TOKEN:
         raise HTTPException(status_code=401, detail="invalid worker token")
 
 
@@ -48,7 +52,10 @@ def create_job(body: JobRequest, idempotency_key: str = Header(alias="Idempotenc
     try:
         active_store = get_store()
         payload = body.model_dump()
-        job = active_store.create_job(idempotency_key, payload, body.job_type, datetime.fromisoformat(body.expires_at.replace("Z", "+00:00"))) if DATABASE_URL else active_store.create_job(idempotency_key, payload)
+        expiry = parse_expiry(body.expires_at)
+        job = active_store.create_job(idempotency_key, payload, body.job_type, expiry) if DATABASE_URL else active_store.create_job(idempotency_key, payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     except LeaseConflict as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
     return {"job_id": job.id, "status": job.status, "expires_at": body.expires_at}
