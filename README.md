@@ -15,3 +15,4 @@ PYTHONPATH=src .venv/bin/pytest
 Empire-workergrunden finns i `src/hivemind/worker.py`. Ingen secret eller driftdata ingår i repot.
 
 Driftsättning på Hivemind eller ändringar på Empire ska ske genom separat godkänd deploy-etapp.
+Se [T12 – dagliga historiska priser från EODHD](docs/verification/T12_EODHD.md) för den manuella testimporten.
